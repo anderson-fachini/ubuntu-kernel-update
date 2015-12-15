@@ -96,14 +96,13 @@ def sha1OfFile(filepath):
     with open(filepath, 'rb') as f:
         return hashlib.sha1(f.read()).hexdigest()
 
-def getSiteHashes(version):
+def getSiteChecksums(version):
     link = 'http://kernel.ubuntu.com/~kernel-ppa/mainline/v' + version + '/CHECKSUMS'
     content = getSiteContent(link, False)
 
-    buffer = io.StringIO(content)
+    regex = '\n(.{40})\s{2}linux-(?:headers|image)-.{12}(?:.{26}_all|-generic.{26}_amd64)\.deb'
 
-    while (line = buffer.readlin()) != '':
-     # TODO 
+    return findInContent(content, regex)
 
 siteVersion = getSiteVersion()
 instVersion = getInstalledVersion()
