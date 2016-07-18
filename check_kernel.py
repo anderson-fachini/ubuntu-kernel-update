@@ -55,7 +55,7 @@ def ajust_version(version, addDigit=True):
 
 def get_ubuntu_site_version(version):
     content = get_site_content('http://kernel.ubuntu.com/~kernel-ppa/mainline/')
-    regex = '"v({}-[^/]*)'.format(ajust_version(version, False))
+    regex = '"v({}-?[^/]*)'.format(ajust_version(version, False))
 
     return find_in_content(content, regex)[::-1]
 
