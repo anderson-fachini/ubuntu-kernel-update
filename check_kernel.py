@@ -72,8 +72,9 @@ def get_numbered_list(list_):
 def get_download_file_names(version, versionLink):
     link = 'http://kernel.ubuntu.com/~kernel-ppa/mainline/v' + versionLink
     content = get_site_content(link)
+    version = ajust_version(version)
 
-    regex = '"(linux-(?:headers|image)-%s.{7}(?:.{26}_all|-generic.{26}_amd64)\.deb)' % ajust_version(version)
+    regex = '"(linux-(?:headers|image)-%s-\d{6}(?:_%s-.{19}_all|-generic_%s-.{19}_amd64)\.deb)' % (version, version, version)
 
     return find_in_content(content, regex)
 
@@ -87,12 +88,8 @@ def get_files(files, versionLink):
     execute_system_command(['wget'] + files)
 
 
-def remove_files(file_names):
-    current_path = os.getcwd()
-
-    params = ['rm']
-    params.extend(file_names)
-
+def remove_files(version):
+    params = ['rm', 'linux*%s*.deb' % version]
     execute_system_command(params)
 
 
@@ -177,7 +174,7 @@ if existing_files:
 
     for file_name in existing_files:
         if sha1_of_file(file_name) != checksums[file_name]:
-            existing_files -= file_name
+            existing_files.remove(file_name)
 
 files_left = [file for file in file_names if file not in existing_files]
 
@@ -189,4 +186,4 @@ print('Installing packages...')
 install_packages(file_names)
 
 print('Remmoving files...')
-remove_files(file_names)
+remove_files(siteVersion)
