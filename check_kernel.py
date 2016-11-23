@@ -72,9 +72,9 @@ def get_numbered_list(list_):
 def get_download_file_names(version, versionLink):
     link = 'http://kernel.ubuntu.com/~kernel-ppa/mainline/v' + versionLink
     content = get_site_content(link)
-    version = ajust_version(version)
+    adjusted_version = ajust_version(version)
 
-    regex = '"(linux-(?:headers|image)-%s-\d{6}(?:_%s-.{19}_all|-generic_%s-.{19}_amd64)\.deb)' % (version, version, version)
+    regex = '"(linux-(?:headers|image)-%s-\d{6}(?:_%s-.{19}_all|-generic_%s-.{19}_amd64)\.deb)' % (adjusted_version, adjusted_version, adjusted_version)
 
     return find_in_content(content, regex)
 
@@ -94,8 +94,6 @@ def remove_files(version):
 
 
 def install_packages(file_names):
-    current_path = os.getcwd()
-
     params = ['sudo', 'dpkg', '-i']
     params.extend(file_names)
 
@@ -112,7 +110,6 @@ def check_existing_deb_files(file_names):
 
 # http://stackoverflow.com/questions/1869885/calculating-sha1-of-a-file
 def sha1_of_file(filepath):
-    import hashlib
     with open(filepath, 'rb') as f:
         return hashlib.sha1(f.read()).hexdigest()
 
@@ -120,16 +117,17 @@ def sha1_of_file(filepath):
 def get_site_checksums(version):
     link = 'http://kernel.ubuntu.com/~kernel-ppa/mainline/v%s/CHECKSUMS' % version
     content = get_site_content(link, False)
+    adjusted_version = ajust_version(version)
 
-    regex = '\n(.{40})\s{2}(linux-(?:headers|image)-.{12}(?:.{26}_all|-generic.{26}_amd64)\.deb)'
+    regex = '\n(.{40})\s{2}(linux-(?:headers|image)-%s-\d{6}(?:_%s-.{19}_all|-generic_%s-.{19}_amd64)\.deb)' % (adjusted_version, adjusted_version, adjusted_version)
 
     finds = find_in_content(content, regex)
-    dict = {}
+    sums = {}
 
     for item in finds:
-        dict[item[1]] = item[0]
+        sums[item[1]] = item[0]
 
-    return dict
+    return sums
 
 
 siteVersion = get_site_version()
@@ -157,7 +155,7 @@ versions = get_numbered_list(versions)
 
 print('Versions found:\n%s' % '\n'.join(versions))
 
-version = input('Wich version do you want to install [1]: ')
+version = input('Which version do you want to install [1]: ')
 if not version:
     index = 0
 else:
@@ -185,5 +183,5 @@ if len(files_left):
 print('Installing packages...')
 install_packages(file_names)
 
-print('Remmoving files...')
+print('Removing files...')
 remove_files(siteVersion)
