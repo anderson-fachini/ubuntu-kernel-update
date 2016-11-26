@@ -3,6 +3,7 @@ import re
 import subprocess
 import os
 import hashlib
+import sys
 
 
 def get_site_content(url, joinLines=True):
@@ -151,6 +152,11 @@ else:
 
 print('Checking available versions...')
 versions = get_ubuntu_site_version(siteVersion)
+
+if not versions:
+    print('Version %s is not available on Ubuntu site yet' % siteVersion)
+    sys.exit()
+
 versions = get_numbered_list(versions)
 
 print('Versions found:\n%s' % '\n'.join(versions))
